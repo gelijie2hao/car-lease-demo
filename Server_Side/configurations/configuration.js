@@ -15,7 +15,7 @@ config.number_of_timeout_checks 	= 15;
 //--------------------------------------------------------------------------------------------------------------------
 
 //Height of the blockchain at the time of deploying the application, used to verify chaincode deploy has completed
-config.start_height = '0';
+config.start_height = '1';
 config.chain_name = 'theChain';
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ config.traceFile = __dirname+'/../logs/app_trace.log'; 	// File where traces sho
 //--------------------------------------------------------------------------------------------------------------------
 
 config.networkFile = null;				 //Put filepath to network data here from bluemix if not using VCAP.  e.g. __dirname+"/../../mycreds.json";
-config.networkProtocol = 'https'			 // The protocol to be used for connecting via rest to the network data peers
+config.networkProtocol = 'http' 			 // The protocol to be used for connecting via rest to the network data peers
 
 //--------------------------------------------------------------------------------------------------------------------
 //	Defines the exported values to be used by other fields for connecting to peers or the app. These will be overwritten on app.js being run if Bluemix is being used or Network JSON is defined
@@ -66,7 +66,7 @@ config.registrar_password = 'DJY27pEnl16d';
 //--------------------------------------------------------------------------------------------------------------------
 
 //Protocol used by HFC to communicate with blockchain peers and CA, need to change this manually.
-config.hfc_protocol = "grpcs";
+config.hfc_protocol = "grpc";
 config.certificate_file_name = "us.blockchain.ibm.com.cert";
 config.key_store_location = "/tmp/keyValStore";
 
@@ -74,9 +74,9 @@ config.key_store_location = "/tmp/keyValStore";
 //	Chaincode
 //--------------------------------------------------------------------------------------------------------------------
 //Chaincode file location
-config.vehicle = "https://github.com/IBM-Blockchain/car-lease-demo/Chaincode/vehicle_code/"
+config.vehicle = "github.com/azemtsov/car-lease-demo/Chaincode/vehicle_code/"
 
 //Chaincode deployed names
-config.vehicle_name = 'cb2e6d8b174328d02f24fbf887f4eb138c4df0c8b3e1d2ac117115426f83206b';
+config.vehicle_name = '161ca0889bb1c2b94c9e871a648d9ac3e454d938cdab3e34c5751105437b70ff';
 
 exports.config = config;                                // Exports for use in other files that require this one
