@@ -1,118 +1,50 @@
-/*eslint-env node */
+'use strict';
+let request = require('request');
+let configFile = require(__dirname+'/../../../../../configurations/configuration.js');
+let tracing = require(__dirname+'/../../../../../tools/traces/trace.js');
+let map_ID = require(__dirname+'/../../../../../tools/map_ID/map_ID.js');
+let Util = require(__dirname+'/../../../../../tools/utils/util');
 
-var request = require('request');
-var reload = require('require-reload')(require),
-    configFile = reload(__dirname+'/../../../../../configurations/configuration.js');
-var tracing = require(__dirname+'/../../../../../tools/traces/trace.js');
-var map_ID = require(__dirname+'/../../../../../tools/map_ID/map_ID.js');
-var hfc = require('hfc');
+let user_id;
+let securityContext;
+let user;
 
-var user_id;
-var attrList = ["name", "affiliation"];
-
-var update = function(req, res)
+let update = function(req, res, next, usersToSecurityContext)
 {
-	if(typeof req.cookies.user != "undefined")
-	{
-		req.session.user = req.cookies.user;
-		req.session.identity = map_ID.user_to_id(req.cookies.user);
-	}
+    if(typeof req.cookies.user !== 'undefined')
+    {
+        req.session.user = req.cookies.user;
+        req.session.identity = map_ID.user_to_id(req.cookies.user);
+    }
 
-        var v5cID = req.params.v5cID;
+    user_id = req.session.identity;
 
-        configFile = reload(__dirname+'/../../../../../configurations/configuration.js');
+    let v5cID = req.params.v5cID;
 
-        user_id = req.session.identity
+    tracing.create('ENTER', 'DELETE blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', {});
 
-	tracing.create('ENTER', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', req.body);
+    res.write('{"message":"Formatting request"}&&');
 
-	var newValue = req.body.value;
-	var function_name = req.body.function_name;
+    let securityContext = usersToSecurityContext[user_id];
 
-	tracing.create('INFO', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', 'Formatting request');
-	res.write('{"message":"Formatting request"}&&');
-
-        var chain = hfc.getChain(configFile.config.chain_name);
-
-        chain.getUser(user_id, function(err, user) {
-                if (err) {
-                        res.status(400)
-                        var error = {}
-                        error.message = 'Unable to update scrap';
-			error.v5cID = v5cID;
-			error.error = true;
-			tracing.create('ERROR', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', error)
-			res.end(JSON.stringify(error))
-                }
-                else {
-                        var invokeRequest = {
-                                chaincodeID: configFile.config.vehicle_name,
-                                fcn: "scrap_vehicle", //function_name.toString(),
-                                args: [v5cID],
-                                attrs: attrList
-                        }
-
-                        var invokeTx = user.invoke(invokeRequest);
-
-                        invokeTx.on('submitted', function(results) {
-                                tracing.create('INFO', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', 'Scrap request submitted succesfully');
-                        });
-
-                        invokeTx.on('complete', function(results) {
-                                var j = request.jar();
-                                var str = "user="+req.session.user;
-                                var cookie = request.cookie(str);
-                                var url = configFile.config.app_url +'/blockchain/assets/vehicles/'+v5cID+'/scrap';
-                                j.setCookie(cookie, url);
-
-                                var options = {
-                                        url: url,
-                                        method: 'GET',
-                                        jar: j
-                                }
-
-                                tracing.create('INFO', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', 'Achieving Consensus');
-                                res.write('{"message":"Achieving Consensus"}&&');
-
-                                var counter = 0;
-                                var interval = setInterval(function(){
-
-                                        if(counter < 15) {
-                                                request(options, function (error, response, body) {
-                                                        if (!error && response.statusCode == 200)
-                                                        {
-                                                                var result = {};
-                                                                result.message = 'Scrap updated'
-                                                                tracing.create('EXIT', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', result);
-                                                                res.end(JSON.stringify(result))
-                                                                clearInterval(interval);
-                                                        }
-                                                });
-                                                counter++;
-                                        }
-                                        else
-                                        {
-                                                res.status(400)
-                                                var error = {}
-                                                error.error  = true;
-                                                error.message = 'Unable to confirm scrap update. Request timed out.';
-                                                tracing.create('ERROR', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', error)
-                                                res.end(JSON.stringify(error))
-                                                clearInterval(interval);
-                                        }
-                                }, 4000);
-                        });
-
-                        invokeTx.on('error', function(error) {
-                                res.status(400)
-                                var error = {}
-                                error.error  = true;
-                                error.message = 'Unable to confirm scrap update.';
-                                tracing.create('ERROR', 'PUT blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', error)
-                                res.end(JSON.stringify(error))
-                        });
-                }
-        });
-}
-
+    return Util.invokeChaincode(securityContext, 'scrap_vehicle', [ v5cID ])
+    .then(function(data) {
+        tracing.create('INFO', 'DELETE blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', 'Achieving consensus');
+        res.write('{"message":"Achieving consensus"}&&');
+        let result = {};
+        result.message = 'Scrap updated';
+        tracing.create('EXIT', 'DELETE blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', result);
+        res.end(JSON.stringify(result));
+    })
+    .catch(function(err) {
+        res.status(400);
+        tracing.create('ERROR', 'DELETE blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', 'Unable to update scrap. v5cID: '+ v5cID);
+        let error = {};
+        error.error = true;
+        error.message = 'Unable to update scrap. ' + err;
+        error.v5cID = v5cID;
+        tracing.create('ERROR', 'DELETE blockchain/assets/vehicles/vehicle/'+v5cID+'/scrap', error);
+        res.end(JSON.stringify(error));
+    });
+};
 exports.delete = update;
