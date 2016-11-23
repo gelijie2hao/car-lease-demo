@@ -24,14 +24,14 @@ config.traceFile    = __dirname+'/../logs/app_trace.log';     // File where trac
 //--------------------------------------------------------------------------------------------------------------------
 
 config.networkFile         = null;                 //Put filepath to network data here from bluemix if not using VCAP.  e.g. __dirname+"/../../mycreds.json";
-config.networkProtocol     = 'https';             // The protocol to be used for connecting via rest to the network data peers
+config.networkProtocol     = 'http';             // The protocol to be used for connecting via rest to the network data peers
 
 
 
 //Settings for the nodeJS application server
-config.appProtocol = 'https';
+config.appProtocol = 'http';
 config.offlineUrl = 'localhost';
-config.app_port = (process.env.VCAP_APP_PORT) ? process.env.VCAP_APP_PORT : 8080;                         //Port that the NodeJS server is operating on
+config.app_port = (process.env.VCAP_APP_PORT) ? process.env.VCAP_APP_PORT : 80;                         //Port that the NodeJS server is operating on
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ config.registrar_password = 'DJY27pEnl16d';
 //--------------------------------------------------------------------------------------------------------------------
 
 //Protocol used by HFC to communicate with blockchain peers and CA, need to change this manually.
-config.hfc_protocol             = 'grpcs';
+config.hfc_protocol             = 'grpc';
 config.certificate_file_name    = 'certificate.pem';
 config.key_store_location       = './keyValStore';
 
@@ -53,7 +53,7 @@ config.key_store_location       = './keyValStore';
 //    Chaincode
 //--------------------------------------------------------------------------------------------------------------------
 //Chaincode file location
-config.vehicle = 'github.com/hyperledger/fabric/vehicle_code';
+config.vehicle = 'github.com/azemtsov/car-lease-demo/Chaincode/src/vehicle_code';
 //Chaincode deployed names
 config.vehicle_name = '2e436d1363bb9f7c00342fa3fe30eff2c303f06ed4a396a06416a5e1e488ead7edd99f337e31fc6692d785bc0d9a30e942f111caccae15e7c34de6c716f0d92a';
 

@@ -365,11 +365,12 @@ if (vcapServices) { // We are running in bluemix
     startup.connectToEventHub(chain, credentials.peers[0], pem);
 
 } else { // We are running locally
-    let credentials = fs.readFileSync(__dirname + '/credentials.json');
-    credentials = JSON.parse(credentials);
-    startup.connectToPeers(chain, credentials.peers);
-    startup.connectToCA(chain, credentials.ca);
-    startup.connectToEventHub(chain, credentials.peers[0]);
+        console.log('\nRunning locally\n');
+        let credentials = fs.readFileSync(__dirname + '/credentials.json');
+        credentials = JSON.parse(credentials);
+        startup.connectToPeers(chain, credentials.peers);
+        startup.connectToCA(chain, credentials.ca);
+        startup.connectToEventHub(chain, credentials.peers[0]);
 }
 
 

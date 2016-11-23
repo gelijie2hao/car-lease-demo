@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/core/chaincode/shim/crypto/attr"
+//	"github.com/hyperledger/fabric/core/chaincode/shim/crypto/attr"
 	"encoding/json"
 	// "crypto/x509"
 	// "encoding/pem"
